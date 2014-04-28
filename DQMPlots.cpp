@@ -1,4 +1,4 @@
-// g++ -Wall -o DQMPlots `root-config --cflags --glibs` functions.cc setTDRStyle.cc DQMPlots.cpp
+// g++ -Wall -o DQMPlots.exe `root-config --cflags --glibs` functions.cc setTDRStyle.cc DQMPlots.cpp
 
 #include "setTDRStyle.h"
 #include "functions.h"

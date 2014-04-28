@@ -1,4 +1,4 @@
-// g++ -Wall -o PADEToRoot `root-config --cflags --glibs` functions.cc PADEToRoot.cpp
+// g++ -Wall -o PADEToRoot.exe `root-config --cflags --glibs` functions.cc PADEToRoot.cpp
 
 #include "functions.h"
 

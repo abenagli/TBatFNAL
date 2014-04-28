@@ -9,7 +9,7 @@ if( ! -e "data/rec_capture_".$run.".txt" )
 
 if( ! -e "ntuples/tot_capture_".$run.".root" )
 {
-  system("./PADEToRoot ".$run." ".$par1);
+  system("./PADEToRoot.exe ".$run." ".$par1);
 }
 
 $dir = "/afs/cern.ch/user/a/abenagli/www/TBatFNAL/".$run;
@@ -20,4 +20,4 @@ $subdir1 = $dir."/plotsPerFib";
 system("mkdir ".$subdir1);
 system("cp ~/public/index.php ".$subdir1);
 
-system("./DQMPlots ".$run);
+system("./DQMPlots.exe ".$run);
