@@ -1,0 +1,6 @@
+*.raw
+*.dat
+*.log
+*.root
+*.conv
+*.gz
