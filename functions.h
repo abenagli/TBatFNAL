@@ -6,9 +6,9 @@
 
 #include "TGraph.h"
 
-void AddWaveform(TGraph* g, std::vector<int>* v, bool pedSub = true);
-float CalculatePedestal(std::vector<int>* v);
-void CalculateAmplitude(std::vector<int>* v, float& ped, float& integral, float& maximum);
+void AddWaveform(TGraph* g, std::vector<float>* v, bool pedSub = true);
+float CalculatePedestal(std::vector<float>* v);
+void CalculateAmplitude(std::vector<float>* v, float& ped, float& integral, float& maximum);
 
 void NormalizeGraph(TGraph* g, const float& norm);
 float GetMinimum(TGraph* g);

@@ -10,7 +10,7 @@ float max = 200.;
 
 
 
-void AddWaveform(TGraph* g, std::vector<int>* v, bool pedSub)
+void AddWaveform(TGraph* g, std::vector<float>* v, bool pedSub)
 {
   float ped = CalculatePedestal(v);
   if( !pedSub ) ped = 0;
@@ -36,7 +36,7 @@ void AddWaveform(TGraph* g, std::vector<int>* v, bool pedSub)
 
 
 
-float CalculatePedestal(std::vector<int>* v)
+float CalculatePedestal(std::vector<float>* v)
 {
   int nPoints = 5;
   float val = 0.;
@@ -50,7 +50,7 @@ float CalculatePedestal(std::vector<int>* v)
 
 
 
-void CalculateAmplitude(std::vector<int>* v, float& ped, float& integral, float& maximum)
+void CalculateAmplitude(std::vector<float>* v, float& ped, float& integral, float& maximum)
 {
   ped = CalculatePedestal(v);
   

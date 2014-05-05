@@ -144,7 +144,7 @@ int analyze_TDCEventHeader(std::map<int,TDCEventHeader>& dummyMap,
   return counter;
 }
 
-void writeData(std::ofstream& outFile, controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader)
+void writeRawData(std::ofstream& outFile, controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader)
 {
   for(std::map<int,TDCEventHeader>::const_iterator mapIt = myTDCEventHeader.begin(); mapIt != myTDCEventHeader.end(); ++mapIt)
   {
@@ -161,6 +161,65 @@ void writeData(std::ofstream& outFile, controllerHeader& myControllerHeader, std
   }
 }
 
+std::map<int,std::pair<int,int> > writeData(controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader)
+{
+  std::map<int,std::pair<int,int> > dummyMapCh;
+  dummyMapCh[1] = std::pair<int,int>(-1,-1);
+  dummyMapCh[2] = std::pair<int,int>(-1,-1);
+  dummyMapCh[3] = std::pair<int,int>(-1,-1);
+  dummyMapCh[4] = std::pair<int,int>(-1,-1);
+  
+  std::map<int,std::pair<int,int> > dummyMapTime;
+  dummyMapTime[1] = std::pair<int,int>(999999,999999);
+  dummyMapTime[2] = std::pair<int,int>(999999,999999);
+  dummyMapTime[3] = std::pair<int,int>(999999,999999);
+  dummyMapTime[4] = std::pair<int,int>(999999,999999);
+    
+  for(std::map<int,TDCEventHeader>::const_iterator mapIt = myTDCEventHeader.begin(); mapIt != myTDCEventHeader.end(); ++mapIt)
+  {
+    int x = -1;
+    int y = -1;
+    int TDCNum = (mapIt->second).TDCNum;
+    int WCNum = (TDCNum-1)/4 + 1;
+    
+    for(int eventIt = 0; eventIt < (mapIt->second).eventData.size(); ++eventIt)
+    {
+      int TDCCh = (mapIt->second).eventData.at(eventIt).first/4;
+      int TDCTime = (mapIt->second).eventData.at(eventIt).second;
+      bool isX = false;
+      bool isY = false;
+      
+      if( TDCNum ==  1 || TDCNum ==  2) { x = (TDCNum- 1)*64 + TDCCh; isX = true; } ;
+      if( TDCNum ==  3 || TDCNum ==  4) { y = (TDCNum- 3)*64 + TDCCh; isY = true; } ;
+      if( TDCNum ==  5 || TDCNum ==  6) { x = (TDCNum- 5)*64 + TDCCh; isX = true; } ;
+      if( TDCNum ==  7 || TDCNum ==  8) { y = (TDCNum- 7)*64 + TDCCh; isY = true; } ;
+      if( TDCNum ==  9 || TDCNum == 10) { x = (TDCNum- 9)*64 + TDCCh; isX = true; } ;
+      if( TDCNum == 11 || TDCNum == 12) { y = (TDCNum-11)*64 + TDCCh; isY = true; } ;
+      if( TDCNum == 13 || TDCNum == 14) { x = (TDCNum-13)*64 + TDCCh; isX = true; } ;
+      if( TDCNum == 15 || TDCNum == 16) { y = (TDCNum-15)*64 + TDCCh; isY = true; } ;
+      
+      if( (isX) && (TDCTime < dummyMapTime[WCNum].first) )
+      {
+        dummyMapCh[WCNum].first = x;
+        dummyMapTime[WCNum].first = TDCTime;
+        //std::cout << "x - WCNum: " << WCNum << "   TDCNum: " << TDCNum << "   TDCTime: " << TDCTime << "   x: " << x << std::endl;
+      }
+      if( (isY) && (TDCTime < dummyMapTime[WCNum].second) )
+      {
+        dummyMapCh[WCNum].second = y;
+        dummyMapTime[WCNum].second = TDCTime;
+        //std::cout << "y - WCNum: " << WCNum << "   TDCNum: " << TDCNum << "   TDCTime: " << TDCTime << "   y: " << y << std::endl;
+      }
+    }
+  }
+  
+  //std::cout << "WC1 - x: " << dummyMapCh[1].first << " y: " << dummyMapCh[1].second << std::endl;
+  //std::cout << "WC2 - x: " << dummyMapCh[2].first << " y: " << dummyMapCh[2].second << std::endl;
+  //std::cout << "WC3 - x: " << dummyMapCh[3].first << " y: " << dummyMapCh[3].second << std::endl;
+  //std::cout << "WC4 - x: " << dummyMapCh[4].first << " y: " << dummyMapCh[4].second << std::endl;
+  
+  return dummyMapCh;
+}
 
 
 

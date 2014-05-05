@@ -58,6 +58,7 @@ int fillTDCEventHeader(TDCEventHeader& dummy, std::vector<int>* data, const int&
 
 bool tryTDCEventHeaderRemoval(std::vector<int>* data, const int& iStart);
 
-void writeData(std::ofstream& outFile, controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader);
+void writeRawData(std::ofstream& outFile, controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader);
+std::map<int,std::pair<int,int> > writeData(controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader);
 
 #endif
