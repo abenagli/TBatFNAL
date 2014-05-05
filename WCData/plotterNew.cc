@@ -1,3 +1,5 @@
+// g++ -Wall -o plotterNew.exe `root-config --cflags --glibs` plotterNew.cc
+
 #include <stdio.h>
 #include <string>
 #include <string.h>
@@ -31,18 +33,21 @@ struct WCData
 
 using namespace std;
 
+std::string inFolder = "./WC_captures";
 
 
-int main(int argc, char *argv[])
+
+int main(int argc, char **argv)
 {
-  string version="RPCSim5";
-  
   char infilename[500];char outfilename[500];
   char hname[200];
+  
   string fno=argv[1];
-  sprintf(infilename,"%s",fno.c_str());
-  sprintf(outfilename,"WCout_%s.root",fno.c_str());
-  cout<<infilename<<" "<<outfilename<<endl;
+  
+  sprintf(infilename,"%s/WC_capture_%s.out",inFolder.c_str(),fno.c_str());
+  sprintf(outfilename,"%s/WC_capture_%s.root",inFolder.c_str(),fno.c_str());
+  cout << ">>> reading " << infilename << endl;
+  cout << ">>> writing " << outfilename << endl;
   
   ifstream infile(infilename);
   
@@ -84,20 +89,20 @@ int main(int argc, char *argv[])
     dd[3] = tdcNum;
     dd[4] = chNum;
     dd[5] = tdcT;
-    cout << "spill: " << dd[0] << "   event: " << dd[1] << "    event: " << dd[2] << "    tdc: " << dd[3] << "    m: " << dd[4] << "    t: " << dd[5] << endl;
+    //cout << "spill: " << dd[0] << "   event: " << dd[1] << "    event: " << dd[2] << "    tdc: " << dd[3] << "    m: " << dd[4] << "    t: " << dd[5] << endl;
     
-    if(nline==0) {for(int i1=0;i1<6;i1++){data[i1].push_back(dd[i1]);} cout << "push back data" << endl;}
+    if(nline==0) {for(int i1=0;i1<6;i1++){data[i1].push_back(dd[i1]);} }
     else
     {
-      cout << "spill check: " << dd[0] << " vs " << data[0].at(data[0].size()-1) << endl;
-      cout << "event check: " << dd[1] << " vs " << data[1].at(data[1].size()-1) << endl;
+      //cout << "spill check: " << dd[0] << " vs " << data[0].at(data[0].size()-1) << endl;
+      //cout << "event check: " << dd[1] << " vs " << data[1].at(data[1].size()-1) << endl;
 
       if(dd[0]==data[0].at(data[0].size()-1)) // same spill
       {
-        cout << "same spill" << endl;
+        //cout << "same spill" << endl;
         if(dd[1]!=data[1].at(data[1].size()-1)) // different event
         {
-          cout << "different event" << endl;
+          //cout << "different event" << endl;
           vector <WCData> WCdata;
           for(int i1=0;i1<datae[0].size();i1++)
           {
@@ -118,7 +123,7 @@ int main(int argc, char *argv[])
             WCData wcc;
             wcc.x=x;wcc.y=y;wcc.t=t;wcc.wc=wc;
             WCdata.push_back(wcc);
-            cout << "wc: " << wcc.wc << "   x: " << wcc.x << "   y: " << wcc.y << "   t: " << wcc.t << endl;
+            //cout << "wc: " << wcc.wc << "   tdc: " << tdc << "   m: " << m << "   x: " << wcc.x << "   y: " << wcc.y << "   t: " << wcc.t << endl;
           }
           
           int Pp[4][2]={{0}};int Ppt[4][2]={{0}};
@@ -137,7 +142,7 @@ int main(int argc, char *argv[])
           for(int i1=0;i1<4;i1++)
           {
             WCXY[i1]->Fill(Pp[i1][0],Pp[i1][1]);
-            cout << "fill wc " << i1+1 << " with " << Pp[i1][0] << "," << Pp[i1][1] << endl;
+            //cout << "fill wc " << i1+1 << " with " << Pp[i1][0] << "," << Pp[i1][1] << endl;
           }
           
           for(int i1=0;i1<6;i1++){datae[i1].clear();}
@@ -146,21 +151,21 @@ int main(int argc, char *argv[])
         }
         else // same event
         {
-          cout << "same event" << endl;
+          //cout << "same event" << endl;
           for(int i1=0;i1<6;i1++){datae[i1].push_back(dd[i1]);}
-          cout << "push back datae" << endl;
+          //cout << "push back datae" << endl;
         }
         
         for(int i1=0;i1<6;i1++){data[i1].push_back(dd[i1]);}
-        cout << "push back data" << endl;
+        //cout << "push back data" << endl;
         
         nhits++;
       }
       else // new spill
       {
-        cout << "new spill" << endl;
-        cout<<NS<<" : Spill "<<data[0].at(data[0].size()-1)<<",   "<<nevt<<" events,   "<<nhits<<" hits"<<endl;
-        cout<<(nevt+1)<<",";
+        //cout << "new spill" << endl;
+        //cout<<NS<<" : Spill "<<data[0].at(data[0].size()-1)<<",   "<<nevt<<" events,   "<<nhits<<" hits"<<endl;
+        //cout<<(nevt+1)<<",";
         nhits=0;
         nevt=0;
         NS++;
@@ -171,9 +176,9 @@ int main(int argc, char *argv[])
     nline++;
     //if(nline>10000) break;
   }
-  cout<<(nevt+1);
+  //cout<<(nevt+1);
   infile.close();
-  cout<<endl<<(NS-1)<<endl;
+  cout<<">>> number of spills processed: "<< (NS-1) << endl;
   outfile->Write();
   outfile->Close();
 }
