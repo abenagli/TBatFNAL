@@ -80,7 +80,7 @@ int analyze_TDCSpillHeader(std::map<int,TDCSpillHeader>& dummyMap,
 
 
 int analyze_TDCEventHeader(std::map<int,TDCEventHeader>& dummyMap,
-                           std::vector<int>* data, const int& iTrigger, const int& iStart, const bool& verbosity)
+                           std::map<int,TDCSpillHeader>& dummyMap2, std::vector<int>* data, const int& iTrigger, const int& iStart, const bool& verbosity)
 {
   if( verbosity )
     std::cout << ">>> TDCEventHeader: iTrigger: " << iTrigger << " <<<" << std::endl;
@@ -90,18 +90,57 @@ int analyze_TDCEventHeader(std::map<int,TDCEventHeader>& dummyMap,
   bool isHeaderGood = false;
   int counter = iStart;
   int iStart2 = iStart;
+  int currentTDCNum = 1;
   while( !isHeaderGood )
   {
     TDCEventHeader dummy;
     counter = fillTDCEventHeader(dummy,data,iStart2);
-    if( counter == iStart2 ) return iStart;
+    if( counter == iStart2 )
+    {
+      if( verbosity )
+      {
+        std::cout << ">>>>>> error: not enough bits to fill TDC event header" << std::endl;
+      }
+      return iStart;
+    }
     
     if( dummy.triggerCount != iTrigger )
     {
       tryTDCEventHeaderRemoval(data,iStart2);
       counter = fillTDCEventHeader(dummy,data,iStart2);
       if( dummy.triggerCount != iTrigger )
-        return iStart;
+      {
+        bool tryTDC4Skip = false;
+        
+        for(int jj = 0; jj < 100; ++jj)
+        {
+          TDCEventHeader dummyNext;
+          int counterNew = fillTDCEventHeader(dummyNext,data,iStart2+jj);
+          if( counterNew == (iStart2+jj) )
+          { 
+            std::cout << ">>>>>> error: trigger count mismatch (iTrigger " << iTrigger << " vs triggerCount " << dummy.triggerCount
+                      << ") for TDC " << dummy.TDCNum << std::endl;
+            return iStart;
+          }
+          if( dummyNext.TDCNum == currentTDCNum+1 && dummyNext.triggerCount == iTrigger )
+          {
+            tryTDC4Skip = true;
+            iStart2 = iStart2+jj;
+            counter = fillTDCEventHeader(dummy,data,iStart2);
+            break;
+          }
+        }
+        
+        if( tryTDC4Skip == false )
+        {
+          if( verbosity )
+          {
+            std::cout << ">>>>>> error: trigger count mismatch (iTrigger " << iTrigger << " vs triggerCount " << dummy.triggerCount
+                      << ") for TDC " << dummy.TDCNum << std::endl;
+          }
+          return iStart;
+        }
+      }
     }
     
     if( verbosity )
@@ -116,6 +155,8 @@ int analyze_TDCEventHeader(std::map<int,TDCEventHeader>& dummyMap,
     
     for(int dataIt = 0; dataIt < dummy.wordCount-9; ++dataIt)
     {
+      if( iStart2+1 >= int(data->size()) ) return counter;
+      
       counter += 2;
       
       std::pair<int,int> dummyData(data->at(iStart2),data->at(iStart2+1));
@@ -136,19 +177,49 @@ int analyze_TDCEventHeader(std::map<int,TDCEventHeader>& dummyMap,
     dummyMap[dummy.TDCNum] = dummy;
     
     TDCEventHeader dummyNext;
-    fillTDCEventHeader(dummyNext,data,counter);    
+    int counterNext = fillTDCEventHeader(dummyNext,data,counter);
     if( (dummy.TDCNum == 16) ||
         (dummyNext.TDCNum >= 1 && dummyNext.TDCNum <= 16 && dummyNext.triggerCount == iTrigger+1) ) isHeaderGood = true;
+    
+    //if( (iTrigger == (dummyMap2[dummy.TDCNum]).triggerCount) &&
+    //    (dummyNext.TDCNum >= 1 && dummyNext.TDCNum <= 16 && dummyNext.triggerCount != iTrigger+1) ) isHeaderGood = true;
+    
+    if( counterNext == counter )
+      isHeaderGood = true;
+    
+    ++currentTDCNum;
   }
   
   return counter;
+}
+
+
+int seekNextTrigger(std::vector<int>* data, const int& iTrigger, const int& iStart, const bool& verbosity)
+{
+  int iStart2 = iStart;
+  
+  while( iStart2 < int(data->size())-18 )
+  {
+    TDCEventHeader dummyNext;
+    fillTDCEventHeader(dummyNext,data,iStart2);
+    if( dummyNext.TDCNum == 1 && dummyNext.triggerCount == iTrigger )
+    {
+      break;
+    }
+    else
+    {
+      ++iStart2;
+    }
+  }
+  
+  return iStart2;
 }
 
 void writeRawData(std::ofstream& outFile, controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader)
 {
   for(std::map<int,TDCEventHeader>::const_iterator mapIt = myTDCEventHeader.begin(); mapIt != myTDCEventHeader.end(); ++mapIt)
   {
-    for(int eventIt = 0; eventIt < (mapIt->second).eventData.size(); ++eventIt)
+    for(unsigned int eventIt = 0; eventIt < (mapIt->second).eventData.size(); ++eventIt)
     {
       outFile << (mapIt->second).TDCTimeStamp << " "
               << myControllerHeader.spillCount << " "
@@ -164,10 +235,10 @@ void writeRawData(std::ofstream& outFile, controllerHeader& myControllerHeader, 
 std::map<int,std::pair<int,int> > writeData(controllerHeader& myControllerHeader, std::map<int,TDCEventHeader>& myTDCEventHeader)
 {
   std::map<int,std::pair<int,int> > dummyMapCh;
-  dummyMapCh[1] = std::pair<int,int>(-1,-1);
-  dummyMapCh[2] = std::pair<int,int>(-1,-1);
-  dummyMapCh[3] = std::pair<int,int>(-1,-1);
-  dummyMapCh[4] = std::pair<int,int>(-1,-1);
+  dummyMapCh[1] = std::pair<int,int>(9999,9999);
+  dummyMapCh[2] = std::pair<int,int>(9999,9999);
+  dummyMapCh[3] = std::pair<int,int>(9999,9999);
+  dummyMapCh[4] = std::pair<int,int>(9999,9999);
   
   std::map<int,std::pair<int,int> > dummyMapTime;
   dummyMapTime[1] = std::pair<int,int>(999999,999999);
@@ -182,7 +253,7 @@ std::map<int,std::pair<int,int> > writeData(controllerHeader& myControllerHeader
     int TDCNum = (mapIt->second).TDCNum;
     int WCNum = (TDCNum-1)/4 + 1;
     
-    for(int eventIt = 0; eventIt < (mapIt->second).eventData.size(); ++eventIt)
+    for(unsigned int eventIt = 0; eventIt < (mapIt->second).eventData.size(); ++eventIt)
     {
       int TDCCh = (mapIt->second).eventData.at(eventIt).first/4;
       int TDCTime = (mapIt->second).eventData.at(eventIt).second;

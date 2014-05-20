@@ -184,15 +184,17 @@ int GetFiberId(const int& chId, const int& PADEId)
 
 int GetCrystalId(const int& chId, const int& PADEId)
 {
-  if( chId ==  7 && PADEId == 28 ) return 0;
-  if( chId ==  0 && PADEId == 28 ) return 1;
-  if( chId ==  3 && PADEId == 28 ) return 2;
-  if( chId ==  9 && PADEId == 28 ) return 3;
-  if( chId ==  2 && PADEId == 28 ) return 4;
-  if( chId == 14 && PADEId == 28 ) return 5;
-  if( chId == 12 && PADEId == 28 ) return 6;
-  if( chId ==  6 && PADEId == 28 ) return 7;
-  if( chId ==  1 && PADEId == 28 ) return 8;
+  if( chId ==  7 && PADEId == 28 ) return  0;
+  if( chId ==  0 && PADEId == 28 ) return  1;
+  if( chId ==  3 && PADEId == 28 ) return  2;
+  if( chId ==  9 && PADEId == 28 ) return  3;
+  if( chId ==  2 && PADEId == 28 ) return  4;
+  if( chId == 14 && PADEId == 28 ) return  5;
+  if( chId == 12 && PADEId == 28 ) return  6;
+  if( chId ==  6 && PADEId == 28 ) return  7;
+  if( chId ==  1 && PADEId == 28 ) return  8;
+  if( chId == 11 && PADEId == 28 ) return  9;
+  if( chId ==  4 && PADEId == 28 ) return 10;
   
   return -1;
 }
